@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Forged &amp; Recover">
+<meta name="theme-color" content="#1a1816">
+<title>Forged &amp; Recover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & ROOT ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:       #141210;
+  --carbon:    #1a1816;
+  --steel:     #2c2926;
+  --iron:      #3d3a36;
+  --plate:     #f4f0e8;
+  --cream:     #ede8de;
+  --bone:      #ccc6b8;
+  --ghost:     #8a8480;
+  --amber:     #c07c00;
+  --amber2:    #e09a10;
+  --amber-glow:#f5b830;
+  --od:        #3d5028;
+  --od-lt:     #dce8ca;
+  --od-rule:   #7a9e58;
+  --slate:     #243d58;
+  --sl-lt:     #dce8f4;
+  --sl-rule:   #6090b8;
+  --sand:      #4a3208;
+  --sand-lt:   #faf4de;
+  --sand-rule: #c8a030;
+  --red:       #6e1a1a;
+  --red-lt:    #faeaea;
+  --white:     #ffffff;
+
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left, 0px);
+  --safe-right:  env(safe-area-inset-right, 0px);
+
+  --nav-h: 60px;
+  --header-h: 56px;
+  font-size: 16px;
+}
+
+html, body {
+  height: 100%;
+  background: var(--carbon);
+  color: var(--plate);
+  font-family: 'Barlow', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ── LAYOUT ───────────────────────────────────────────────────────── */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+/* ── HEADER ───────────────────────────────────────────────────────── */
+#header {
+  flex-shrink: 0;
+  height: var(--header-h);
+  background: var(--carbon);
+  border-bottom: 1px solid var(--steel);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  position: relative;
+  z-index: 10;
+}
+#back-btn {
+  display: none;
+  background: var(--steel);
+  border: none;
+  color: var(--amber2);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#header-title {
+  flex: 1;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--plate);
+  line-height: 1;
+}
+#header-title span { color: var(--amber); }
+#header-badge {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--ghost);
+  background: var(--steel);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+/* ── SCROLL AREA ──────────────────────────────────────────────────── */
+#scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* ── BOTTOM NAV ───────────────────────────────────────────────────── */
+#nav {
+  flex-shrink: 0;
+  height: var(--nav-h);
+  background: var(--carbon);
+  border-top: 1px solid var(--steel);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding-bottom: max(var(--safe-bottom), 4px);
+}
+.nav-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  color: var(--ghost);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: color 0.15s;
+  padding-top: 8px;
+}
+.nav-tab svg { width: 22px; height: 22px; }
+.nav-tab.active { color: var(--amber); }
+
+/* ── SCREENS ──────────────────────────────────────────────────────── */
+.screen { display: none; padding: 0 0 16px; }
+.screen.active { display: block; }
+
+/* ── TODAY SCREEN ─────────────────────────────────────────────────── */
+#today-hero {
+  background: linear-gradient(160deg, var(--steel) 0%, var(--carbon) 100%);
+  padding: 20px 16px 16px;
+  border-bottom: 2px solid var(--amber);
+  position: relative;
+  overflow: hidden;
+}
+#today-hero::before {
+  content: '';
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: var(--amber);
+  opacity: 0.04;
+}
+.hero-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--amber);
+  margin-bottom: 6px;
+}
+.hero-week {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: var(--plate);
+  margin-bottom: 4px;
+}
+.hero-week span { color: var(--amber); }
+.hero-sub {
+  font-size: 13px;
+  color: var(--ghost);
+  margin-bottom: 16px;
+}
+.progress-bar-wrap {
+  background: var(--iron);
+  border-radius: 3px;
+  height: 4px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--amber);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.progress-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  color: var(--ghost);
+  letter-spacing: 0.08em;
+}
+
+/* Week selector */
+#week-selector {
+  display: flex;
+  padding: 12px 16px;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--steel);
+}
+#week-selector::-webkit-scrollbar { display: none; }
+.week-chip {
+  flex-shrink: 0;
+  background: var(--steel);
+  border: 1px solid var(--iron);
+  color: var(--ghost);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.week-chip.active {
+  background: var(--amber);
+  color: var(--ink);
+  border-color: var(--amber);
+}
+
+/* Session cards */
+.sessions-grid {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.session-card {
+  background: var(--steel);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  active: none;
+}
+.session-card:active { transform: scale(0.98); }
+.session-card-header {
+  display: flex;
+  align-items: stretch;
+}
+.session-code-pill {
+  width: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--white);
+  padding: 14px 4px;
+  flex-shrink: 0;
+  gap: 2px;
+}
+.session-code-pill small {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+}
+.session-info {
+  flex: 1;
+  padding: 12px 14px;
+}
+.session-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--plate);
+  margin-bottom: 3px;
+  line-height: 1.2;
+}
+.session-tags {
+  font-size: 11px;
+  color: var(--ghost);
+  line-height: 1.4;
+}
+.session-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px 14px;
+  gap: 4px;
+}
+.session-mins {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--plate);
+  line-height: 1;
+}
+.session-mins small {
+  font-size: 9px;
+  color: var(--ghost);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+.session-progress-ring { margin-top: 4px; }
+
+/* Completion ring */
+.ring-wrap { position: relative; width: 28px; height: 28px; }
+.ring-wrap svg { transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: var(--iron); stroke-width: 2.5; }
+.ring-fg { fill: none; stroke-width: 2.5; stroke-linecap: round;
+           transition: stroke-dashoffset 0.4s ease; }
+.ring-pct {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 8px; font-weight: 700; color: var(--plate);
+}
+
+/* Session type badge */
+.type-badge {
+  margin: 0 16px 0;
+  padding: 6px 12px;
+  border-radius: 0 0 8px 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-align: center;
+}
+.full-badge   { background: var(--od);    color: var(--od-lt); }
+.short-badge  { background: var(--slate); color: var(--sl-lt); }
+.rest-badge   { background: var(--iron);  color: var(--ghost); }
+
+/* ── SESSION DETAIL SCREEN ────────────────────────────────────────── */
+#session-screen { padding-bottom: 32px; }
+
+.session-hero {
+  padding: 18px 16px 16px;
+  border-bottom: 3px solid var(--amber);
+}
+.session-hero-type {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--amber);
+  margin-bottom: 4px;
+}
+.session-hero-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  color: var(--plate);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+.session-hero-tags {
+  font-size: 12px;
+  color: var(--ghost);
+  margin-bottom: 14px;
+}
+.session-stats {
+  display: flex;
+  gap: 12px;
+}
+.stat-pill {
+  background: var(--iron);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--plate);
+  letter-spacing: 0.05em;
+}
+.stat-pill span { color: var(--amber); }
+
+/* Reset + complete buttons */
+.session-actions {
+  padding: 12px 16px;
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--steel);
+}
+.btn-reset {
+  background: var(--iron);
+  border: none;
+  color: var(--ghost);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btn-complete {
+  flex: 1;
+  background: var(--amber);
+  border: none;
+  color: var(--ink);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-complete.done { background: var(--od-rule); color: var(--white); }
+
+/* Block sections */
+.block-section { margin: 12px 16px 0; }
+
+.block-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--carbon);
+  border-radius: 8px 8px 0 0;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--amber);
+}
+.block-type-tag {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--amber2);
+  background: var(--steel);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.block-detail {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--ghost);
+  flex: 1;
+}
+
+/* Exercise rows */
+.ex-list {
+  background: var(--steel);
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+}
+.ex-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  gap: 12px;
+  border-bottom: 1px solid var(--iron);
+  cursor: pointer;
+  transition: background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.ex-row:last-child { border-bottom: none; }
+.ex-row:active { background: var(--iron); }
+.ex-row.checked { opacity: 0.55; }
+.ex-check {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--iron);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.ex-row.checked .ex-check {
+  background: var(--amber);
+  border-color: var(--amber);
+}
+.ex-check-icon { display: none; }
+.ex-row.checked .ex-check-icon { display: block; }
+.ex-check-empty { display: block; }
+.ex-row.checked .ex-check-empty { display: none; }
+
+.ex-body { flex: 1; min-width: 0; }
+.ex-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--plate);
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+.ex-sub {
+  font-size: 12px;
+  color: var(--ghost);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+.ex-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+.ex-reps {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--amber2);
+  letter-spacing: 0.03em;
+}
+.ex-load {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ghost);
+  letter-spacing: 0.05em;
+  margin-top: 1px;
+}
+
+/* Note bar */
+.note-bar {
+  background: var(--carbon);
+  border-left: 3px solid var(--amber);
+  padding: 8px 12px;
+  margin: 0 16px;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--ghost);
+  line-height: 1.5;
+  border-radius: 0 4px 4px 0;
+}
+
+/* Conditioning options */
+.cond-option {
+  background: var(--steel);
+  border-radius: 8px;
+  margin: 12px 16px 0;
+  overflow: hidden;
+}
+.cond-option-hdr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--iron);
+}
+.cond-opt-badge {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.opt-a { background: var(--od);    color: var(--od-lt); }
+.opt-b { background: var(--slate); color: var(--sl-lt); }
+.opt-c { background: var(--iron);  color: var(--amber2); border: 1px solid var(--amber); }
+.cond-opt-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--plate);
+  flex: 1;
+}
+.indoor-tag {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--amber2);
+  background: var(--steel);
+  border: 1px solid var(--amber);
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.cond-opt-body {
+  padding: 10px 14px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.cond-opt-desc {
+  flex: 1;
+  font-size: 12.5px;
+  color: var(--bone);
+  line-height: 1.5;
+}
+.cond-opt-stats {
+  text-align: right;
+  flex-shrink: 0;
+}
+.cond-dur {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--amber2);
+}
+.cond-int {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  color: var(--ghost);
+  margin-top: 1px;
+}
+
+/* Completed session overlay */
+.session-complete-bar {
+  margin: 12px 16px 0;
+  background: var(--od);
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.session-complete-bar .icon { font-size: 20px; }
+.session-complete-bar .text {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--od-lt);
+}
+
+/* ── PROGRAMME SCREEN ─────────────────────────────────────────────── */
+.phase-banner {
+  margin: 12px 16px 0;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.phase-banner-inner {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.phase-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 1;
+  opacity: 0.3;
+  flex-shrink: 0;
+  width: 36px;
+}
+.phase-info { flex: 1; }
+.phase-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  opacity: 0.7;
+  margin-bottom: 2px;
+}
+.phase-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.phase-tagline {
+  font-size: 11px;
+  opacity: 0.7;
+  line-height: 1.4;
+}
+.phase-weeks {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.phase-1-bg { background: var(--od);    color: var(--white); }
+.phase-2-bg { background: var(--slate); color: var(--white); }
+.phase-3-bg { background: var(--sand);  color: var(--white); }
+
+/* Session list in programme */
+.prog-session-list {
+  margin: 6px 16px 0;
+  background: var(--steel);
+  border-radius: 8px;
+  overflow: hidden;
+  display: none;
+}
+.prog-session-list.open { display: block; }
+.prog-session-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--iron);
+  cursor: pointer;
+  gap: 12px;
+  -webkit-tap-highlight-color: transparent;
+}
+.prog-session-row:last-child { border-bottom: none; }
+.prog-session-row:active { background: var(--iron); }
+.prog-code {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px; font-weight: 900;
+  color: var(--white);
+  flex-shrink: 0;
+}
+.prog-info { flex: 1; }
+.prog-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: var(--plate); letter-spacing: 0.02em;
+}
+.prog-sub { font-size: 11px; color: var(--ghost); margin-top: 1px; }
+.prog-arrow { color: var(--ghost); font-size: 18px; }
+
+/* ── PROGRESS SCREEN ──────────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 12px 16px 0;
+}
+.stat-card {
+  background: var(--steel);
+  border-radius: 10px;
+  padding: 14px;
+}
+.stat-card-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--ghost);
+  margin-bottom: 6px;
+}
+.stat-card-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--amber2);
+  line-height: 1;
+}
+.stat-card-unit {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ghost);
+  margin-top: 2px;
+}
+
+.phase-progress-section {
+  margin: 14px 16px 0;
+}
+.phase-progress-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--ghost);
+  margin-bottom: 8px;
+}
+.phase-progress-card {
+  background: var(--steel);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 8px;
+}
+.phase-progress-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.phase-progress-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--plate);
+  letter-spacing: 0.03em;
+}
+.phase-progress-pct {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--amber2);
+}
+.phase-prog-bar {
+  background: var(--iron);
+  border-radius: 3px;
+  height: 6px;
+  overflow: hidden;
+}
+.phase-prog-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.recent-section {
+  margin: 14px 16px 0;
+}
+.recent-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--ghost);
+  margin-bottom: 8px;
+}
+.recent-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--steel);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  gap: 10px;
+}
+.recent-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+  flex-shrink: 0;
+}
+.recent-text {
+  flex: 1;
+  font-size: 13px;
+  color: var(--plate);
+}
+.recent-time {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  color: var(--ghost);
+}
+
+/* Reset button */
+.danger-zone {
+  margin: 20px 16px 0;
+  padding: 14px;
+  background: var(--steel);
+  border-radius: 10px;
+}
+.danger-zone-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.15em; color: var(--ghost);
+  margin-bottom: 10px;
+}
+.btn-danger {
+  width: 100%;
+  background: var(--red);
+  border: none;
+  color: var(--plate);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ── INSTALL BANNER ───────────────────────────────────────────────── */
+#install-banner {
+  display: none;
+  margin: 12px 16px 0;
+  background: var(--steel);
+  border: 1px solid var(--amber);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+#install-banner p {
+  font-size: 13px;
+  color: var(--bone);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+#install-banner p strong { color: var(--amber2); }
+#install-close {
+  background: none; border: none;
+  color: var(--ghost); font-size: 18px;
+  cursor: pointer; float: right; margin-top: -4px;
+}
+
+/* ── TOAST ────────────────────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: calc(var(--nav-h) + var(--safe-bottom) + 12px);
+  left: 50%; transform: translateX(-50%);
+  background: var(--amber);
+  color: var(--ink);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 10px 20px;
+  border-radius: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  z-index: 100;
+}
+#toast.show { opacity: 1; }
+
+/* ── UTILS ────────────────────────────────────────────────────────── */
+.mt-12 { margin-top: 12px; }
+.px-16 { padding: 0 16px; }
+.section-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.2em; color: var(--ghost);
+  padding: 14px 16px 6px;
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <header id="header">
+    <button id="back-btn" onclick="goBack()">← BACK</button>
+    <div id="header-title">FORGED <span>&</span> RECOVER</div>
+    <div id="header-badge">90 DAY</div>
+  </header>
+
+  <!-- SCROLL AREA -->
+  <div id="scroll-area">
+
+    <!-- TODAY SCREEN -->
+    <div id="screen-today" class="screen active">
+      <div id="today-hero">
+        <div class="hero-label">// CURRENT STATUS</div>
+        <div class="hero-week">WEEK <span id="current-week-display">1</span></div>
+        <div class="hero-sub" id="phase-display">Phase 1 · Foundation</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="overall-progress" style="width:0%"></div>
+        </div>
+        <div class="progress-label" id="progress-label">0 of 90 days complete</div>
+      </div>
+
+      <div id="week-selector"></div>
+
+      <div id="install-banner">
+        <button id="install-close" onclick="document.getElementById('install-banner').style.display='none'">×</button>
+        <p>📲 <strong>Add to Home Screen</strong> for the full app experience.<br>
+        Tap the <strong>Share</strong> button in Safari, then <strong>"Add to Home Screen"</strong>.</p>
+      </div>
+
+      <div class="section-label">SELECT SESSION</div>
+      <div class="sessions-grid" id="sessions-grid"></div>
+    </div>
+
+    <!-- SESSION DETAIL SCREEN -->
+    <div id="screen-session" class="screen">
+      <div id="session-content"></div>
+    </div>
+
+    <!-- PROGRAMME SCREEN -->
+    <div id="screen-programme" class="screen">
+      <div class="section-label">ALL PHASES</div>
+      <div id="programme-list"></div>
+    </div>
+
+    <!-- PROGRESS SCREEN -->
+    <div id="screen-progress" class="screen">
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="phase-progress-section">
+        <div class="phase-progress-title">PHASE COMPLETION</div>
+        <div id="phase-progress-cards"></div>
+      </div>
+      <div class="recent-section">
+        <div class="recent-title">RECENT SESSIONS</div>
+        <div id="recent-list"></div>
+      </div>
+      <div class="danger-zone">
+        <div class="danger-zone-title">RESET PROGRESS</div>
+        <button class="btn-danger" onclick="confirmReset()">RESET ALL PROGRESS</button>
+      </div>
+    </div>
+
+  </div><!-- /scroll-area -->
+
+  <!-- NAV -->
+  <nav id="nav">
+    <button class="nav-tab active" onclick="showTab('today',this)" id="tab-today">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      TODAY
+    </button>
+    <button class="nav-tab" onclick="showTab('programme',this)" id="tab-programme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+      PROGRAMME
+    </button>
+    <button class="nav-tab" onclick="showTab('progress',this)" id="tab-progress">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      PROGRESS
+    </button>
+  </nav>
+
+</div>
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// PROGRAMME DATA
+// ═══════════════════════════════════════════════════════════════════
+
+const PHASES = [
+  {
+    num: 1, name: "FOUNDATION", weeks: "1–4",
+    tagline: "GBRS Mobility · Anti-Rotation Core · KB Hinge Base · Zone 2 Build",
+    bg: "phase-1-bg",
+    directive: "Establish foundations before loading them aggressively. Week 4 is a structured deload: drop all loads 30%, cut cardio by half.",
+    sessions: ["A","B","C","D","E"]
+  },
+  {
+    num: 2, name: "BUILD", weeks: "5–8",
+    tagline: "Load Progression · Tempo Runs · Sandbag Complex · Bike Tempo",
+    bg: "phase-2-bg",
+    directive: "All loads step up one level. Sandbag takes a larger role. Tempo runs and bike tempo introduced. Sprint rounds increase to 6. Week 8 is the deload.",
+    sessions: ["A","B","C","D","E"]
+  },
+  {
+    num: 3, name: "PEAK", weeks: "9–12",
+    tagline: "Max Load · 8-Round Sprint Protocol · Heavy Vest · Full Output",
+    bg: "phase-3-bg",
+    directive: "Peak output across all channels. 8-round sprint/bike HIIT. Vest conditioning at maximum duration. Dips weighted. Week 12 is test week.",
+    sessions: ["A","B","C","D","E"]
+  }
+];
+
+const SESSIONS = {
+  A: {
+    title: "Posterior Chain + Zone 2",
+    tags: "KB · DB · Pull-ups · Outdoor / Assault Bike",
+    type: "FULL SESSION",
+    mins: 50,
+    blocks: [
+      {
+        type: "GBRS WARM-UP", detail: "MANDATORY · 5 MIN",
+        note: "Non-negotiable. Prime the posterior chain and deep core before every session.",
+        exercises: [
+          { name: "Adductor Rock to Hip Walk-Out", sub: "Slow and deliberate", reps: "2 × 8", load: "BW" },
+          { name: "Glute Mobilisation", sub: "Hip circles and figure-4 flow", reps: "2 × 8", load: "BW" },
+          { name: "Dead Bug", sub: "Exhale fully — lower back flat throughout", reps: "3 × 8 ea.", load: "BW" },
+          { name: "Glute Bridge Hold", sub: "Drive knees out — hard squeeze at top", reps: "3 × 30 sec", load: "BW" },
+        ]
+      },
+      {
+        type: "STRENGTH BLOCK", detail: "3 ROUNDS · REST 90 SEC",
+        note: "Phase 1: moderate loads. Suitcase carry and birddog are the anti-rotation priority. Add 4th round in Week 3.",
+        exercises: [
+          { name: "KB Single-Leg RDL", sub: "Hip hinge — flat back — soft knee", reps: "8 ea. side", load: "Light" },
+          { name: "KB Goblet Squat", sub: "3 sec descent — 1 sec pause at bottom", reps: "10", load: "Medium" },
+          { name: "Pull-ups", sub: "Dead hang to chin over bar — full ROM", reps: "To failure", load: "BW" },
+          { name: "DB Suitcase Carry", sub: "Anti-lateral flexion — GBRS core staple", reps: "2 × 20 steps", load: "Med–Heavy" },
+          { name: "Birddog", sub: "Opposite arm + leg — 3 sec hold each rep", reps: "3 × 8 ea.", load: "BW" },
+        ]
+      },
+    ],
+    conditioning: {
+      label: "CONDITIONING · ZONE 2",
+      detail: "HR 130–150 · NASAL BREATHING",
+      note: "All three options produce identical HRV and fat-loss benefits. Use Option C until outdoor terrain opens.",
+      options: [
+        { badge: "A", label: "Easy Run or Walk", indoor: false,
+          desc: "Wk 1: 12 min · Wk 2: 15 min · Wk 3: 18 min · Wk 4: 10 min", dur: "12–18 min", intensity: "Zone 2" },
+        { badge: "B", label: "Vest Ruck 20–25 lb", indoor: false,
+          desc: "Same HR target and durations. Burns 30–50% more calories than walking. Best outdoor option.", dur: "12–18 min", intensity: "Zone 2" },
+        { badge: "C", label: "Assault Bike Steady", indoor: true,
+          desc: "Steady pedal at HR 130–150. Fully conversational pace. Same duration targets.", dur: "12–18 min", intensity: "Zone 2" },
+      ]
+    }
+  },
+
+  B: {
+    title: "KB Metcon + HIIT",
+    tags: "KB · Sandbag · Field Sprints / Assault Bike",
+    type: "FULL SESSION",
+    mins: 50,
+    blocks: [
+      {
+        type: "BELLMADE REPS BLOCK", detail: "SELF-PACED · COMPLETE ALL REPS FIRST",
+        note: "Complete all reps before the HIIT block. Target: under 14 min total.",
+        exercises: [
+          { name: "KB Swing", sub: "Hip snap — not a squat — explosive", reps: "40", load: "Med–Heavy" },
+          { name: "KB Clean + Press", sub: "Alternate sides — strict — no leg drive", reps: "20 (10L/10R)", load: "Medium" },
+          { name: "Hand-to-Hand Swing", sub: "Each switch = one rep — max hip power", reps: "30", load: "Medium" },
+          { name: "Sandbag Bear Hug Squat", sub: "Hug bag to chest — 3 sec descent", reps: "15", load: "40–50 lb" },
+          { name: "Tuck Ups", sub: "Lower back flat throughout", reps: "20", load: "BW" },
+        ]
+      },
+    ],
+    conditioning: {
+      label: "CONDITIONING · HIIT",
+      detail: "A: SPRINTS · B: STAIRS · C: ASSAULT BIKE",
+      note: "Option C is your primary HIIT tool until April. 20 sec all-out on the bike = same anaerobic stimulus as a 40m field sprint.",
+      options: [
+        { badge: "A", label: "40m Sprint Repeats", indoor: false,
+          desc: "All-out sprint. Walk back = full recovery. Wk 1–2: 4 rounds. Wk 3: 5 rounds. Wk 4: 3 rounds.", dur: "4–5 rounds", intensity: "100%" },
+        { badge: "B", label: "Stair Repeats", indoor: false,
+          desc: "Sprint up. Walk down. Same round count. Adds eccentric quad load.", dur: "4–5 rounds", intensity: "100%" },
+        { badge: "C", label: "Assault Bike HIIT", indoor: true,
+          desc: "20 sec max effort / 40 sec complete rest. Wk 1–2: 4 rounds. Wk 3: 5 rounds. Wk 4: 3 rounds at 70%.", dur: "4–5 rounds", intensity: "Max" },
+      ]
+    }
+  },
+
+  C: {
+    title: "Lower Body + Loaded Carry",
+    tags: "KB · DB · Sandbag · Vest · Hills / Assault Bike",
+    type: "FULL SESSION",
+    mins: 55,
+    blocks: [
+      {
+        type: "GBRS GLUTE + CORE ACTIVATION", detail: "MANDATORY · 5 MIN",
+        note: "Glute medius activation stabilises the pelvis under all subsequent loaded movement.",
+        exercises: [
+          { name: "Hollow Body Hold", sub: "Lower back to floor — controlled breathing", reps: "3 × 20 sec", load: "BW" },
+          { name: "Banded Clamshell", sub: "No hip rocking — squeeze glute at top", reps: "15 ea.", load: "Light band" },
+          { name: "Side Bridge + Abduction", sub: "Lateral core + glute medius activation", reps: "1 × 20 sec ea.", load: "BW" },
+        ]
+      },
+      {
+        type: "STRENGTH BLOCK", detail: "3 ROUNDS · REST 90 SEC · ADD 4TH WEEK 3",
+        note: "Sandbag shouldering directly simulates casualty movement and gear lifts.",
+        exercises: [
+          { name: "KB Romanian Deadlift", sub: "Hinge — soft knee — drive hips back", reps: "10", load: "Med–Heavy" },
+          { name: "KB Rack Squat", sub: "KB in rack — upright torso — 5L/5R", reps: "10 (5L/5R)", load: "Medium" },
+          { name: "Sandbag Shouldering", sub: "Lift to one shoulder — alternate sides", reps: "8 ea. side", load: "60–80 lb" },
+          { name: "DB Farmer's Carry", sub: "GBRS staple — brace core — tall spine", reps: "2 × 25 steps", load: "Heavy" },
+          { name: "Copenhagen Plank", sub: "Full side plank — lateral core + adductor", reps: "3 × 15 sec ea.", load: "BW" },
+        ]
+      },
+    ],
+    conditioning: {
+      label: "CONDITIONING · LOADED CARDIO",
+      detail: "A: VEST HILLS · B: VEST RUCK · C: BIKE EMOM",
+      note: "Option C with vest on bike during rest = closest indoor equivalent to vest hill repeats.",
+      options: [
+        { badge: "A", label: "Vest Hill Repeats", indoor: false,
+          desc: "Walk/jog up hill in vest. Walk down. HR 140–160. Wk 1–2: 10 min. Wk 3: 12 min. Wk 4: 8 min.", dur: "10–12 min", intensity: "Mod–High" },
+        { badge: "B", label: "Vest Ruck on Roads", indoor: false,
+          desc: "Sustained brisk walk in vest. HR 130–150. Same duration targets.", dur: "10–12 min", intensity: "Zone 2" },
+        { badge: "C", label: "Assault Bike EMOM", indoor: true,
+          desc: "Every minute: 15 sec sprint / 45 sec easy pedal. Wk 1–2: 8 rounds. Wk 3: 10 rounds. Wk 4: 6 rounds.", dur: "8–10 rounds", intensity: "85–90%" },
+      ]
+    }
+  },
+
+  D: {
+    title: "Upper Body · Pre-Shift",
+    tags: "KB · DB · Pull-ups · Bands · Dips",
+    type: "SHORT SESSION",
+    mins: 25,
+    blocks: [
+      {
+        type: "GBRS SHOULDER PREP + STRENGTH", detail: "25 MIN MAX · DO NOT EXHAUST PRE-SHIFT",
+        note: "25 min MAX on a shift day. You are on patrol in under 90 minutes. Leave the tank at 80%.",
+        exercises: [
+          { name: "Powell Raise", sub: "Side-lying DB — slow and controlled", reps: "2 × 8", load: "Light DB" },
+          { name: "Banded Face Pull", sub: "Elbows high — full external rotation", reps: "1 × 12", load: "Light band" },
+          { name: "KB Strict Press", sub: "4L / 4R — zero leg drive", reps: "8 (4L/4R)", load: "Medium" },
+          { name: "Pull-ups", sub: "Full ROM — add weight when 8+ reps easy", reps: "To failure", load: "BW" },
+          { name: "DB Floor Press", sub: "4 sec eccentric — pause at chest", reps: "8", load: "Med–Heavy" },
+          { name: "Dip Bar Support Hold", sub: "Packed shoulders — straight arms", reps: "3 × 20 sec", load: "BW" },
+          { name: "Band Pull-Apart", sub: "Scapular retraction — slow return", reps: "15", load: "Light band" },
+        ]
+      },
+    ]
+  },
+
+  E: {
+    title: "Anti-Rotation Core · Pre-Shift",
+    tags: "Bodyweight · Bands · KB · Assault Bike option",
+    type: "SHORT SESSION",
+    mins: 25,
+    blocks: [
+      {
+        type: "GBRS ANTI-ROTATION CIRCUIT", detail: "2 ROUNDS · 20 MIN TOTAL",
+        note: "On pre-shift days: 20 minutes of anti-rotation work fixes your biggest weakness. On high-fatigue days, use the assault bike Zone 2 option instead.",
+        exercises: [
+          { name: "Dead Bug", sub: "3 sec hold each rep — exhale fully", reps: "3 × 8 ea.", load: "BW" },
+          { name: "Birddog Row", sub: "GBRS staple — DB row from extended arm", reps: "3 × 8 ea.", load: "Light DB" },
+          { name: "Lateral Bridge", sub: "From elbow — 30 sec hold — both sides", reps: "3 × 30 sec ea.", load: "BW" },
+          { name: "Pallof Press", sub: "Anti-rotation — band at pull-up bar", reps: "3 × 10 ea.", load: "Light band" },
+          { name: "KB Suitcase Carry", sub: "20 steps each arm — tall spine — no lean", reps: "2 × 20 steps", load: "Medium" },
+          { name: "Hollow Body Rocks", sub: "Arms by ears — controlled rhythm", reps: "3 × 15", load: "BW" },
+          { name: "— OR — Assault Bike Zone 2", sub: "Replace entire circuit if fatigued. 20 min easy. HR under 140.", reps: "20 min", load: "Zone 2" },
+        ]
+      },
+    ]
+  },
+};
+
+// Phase 2 and 3 sessions inherit base but with load notes
+const SESSION_PHASE_NOTES = {
+  2: {
+    A: "All loads one level heavier than Phase 1. Sandbag Zercher squat replaces goblet squat.",
+    B: "Dead snatch replaces KB swing as primary ballistic. Sandbag over-shoulder and drag added.",
+    C: "Sandbag Zercher walking lunge replaces rack squat. Heavy sandbag carry added.",
+    D: "Weighted pull-ups and chest dips added. Phase 2 upper body progression.",
+    E: "Heavier DB birddog row. Sandbag overhead carry added."
+  },
+  3: {
+    A: "Peak loading. 4 rounds. Weighted pull-ups target +10–15 lb.",
+    B: "Peak KB complex. 8-round sprint/bike HIIT protocol.",
+    C: "Weighted chest dips. 4 rounds. Peak vest conditioning.",
+    D: "Weighted dips +5–10 lb. DB Pendlay row added. 30 min session.",
+    E: "Sandbag rotational toss added. Peak anti-rotation circuit."
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// STATE + STORAGE
+// ═══════════════════════════════════════════════════════════════════
+
+const STORAGE_KEY = 'fnr_v1';
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return {
+    currentWeek: 1,
+    completedSessions: {},  // "ph1_wk1_A": { ts, exercises: [true,false,...] }
+    log: []                  // [{session, week, phase, ts}]
+  };
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+let state = loadState();
+let currentScreen = 'today';
+let prevScreen = null;
+let currentSessionKey = null;
+
+// ═══════════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════════
+
+function showTab(name, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  btn.classList.add('active');
+  currentScreen = name;
+  prevScreen = null;
+  document.getElementById('back-btn').style.display = 'none';
+  document.getElementById('header-badge').style.display = '';
+  document.getElementById('scroll-area').scrollTop = 0;
+
+  if (name === 'today') renderToday();
+  else if (name === 'programme') renderProgramme();
+  else if (name === 'progress') renderProgress();
+}
+
+function openSession(phase, sessionCode, week) {
+  prevScreen = currentScreen;
+  currentSessionKey = `ph${phase}_wk${week}_${sessionCode}`;
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-session').classList.add('active');
+  currentScreen = 'session';
+
+  document.getElementById('back-btn').style.display = 'block';
+  document.getElementById('header-badge').style.display = 'none';
+
+  renderSession(phase, sessionCode, week);
+  document.getElementById('scroll-area').scrollTop = 0;
+}
+
+function goBack() {
+  if (prevScreen) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + prevScreen).classList.add('active');
+    currentScreen = prevScreen;
+    prevScreen = null;
+    document.getElementById('back-btn').style.display = 'none';
+    document.getElementById('header-badge').style.display = '';
+
+    if (currentScreen === 'today') renderToday();
+    else if (currentScreen === 'progress') renderProgress();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER TODAY
+// ═══════════════════════════════════════════════════════════════════
+
+function renderToday() {
+  const week = state.currentWeek;
+  const phase = week <= 4 ? 1 : week <= 8 ? 2 : 3;
+  const phaseNames = ['', 'Foundation', 'Build', 'Peak'];
+
+  document.getElementById('current-week-display').textContent = week;
+  document.getElementById('phase-display').textContent =
+    `Phase ${phase} · ${phaseNames[phase]}`;
+
+  const pct = Math.round(((week - 1) / 12) * 100);
+  document.getElementById('overall-progress').style.width = pct + '%';
+  document.getElementById('progress-label').textContent =
+    `Week ${week} of 12 · ${pct}% complete`;
+
+  // Week selector chips
+  const ws = document.getElementById('week-selector');
+  ws.innerHTML = '';
+  for (let w = 1; w <= 12; w++) {
+    const chip = document.createElement('button');
+    chip.className = 'week-chip' + (w === week ? ' active' : '');
+    chip.textContent = `WK ${w}`;
+    chip.onclick = () => {
+      state.currentWeek = w;
+      saveState();
+      renderToday();
+    };
+    ws.appendChild(chip);
+  }
+  // Scroll active chip into view
+  setTimeout(() => {
+    const active = ws.querySelector('.week-chip.active');
+    if (active) active.scrollIntoView({ inline: 'center', behavior: 'smooth' });
+  }, 50);
+
+  // Session cards
+  const grid = document.getElementById('sessions-grid');
+  grid.innerHTML = '';
+
+  const phaseColors = { 1: '#3d5028', 2: '#243d58', 3: '#4a3208' };
+  const sessionDescs = {
+    A: 'Posterior Chain + Zone 2',
+    B: 'KB Metcon + HIIT',
+    C: 'Lower Body + Loaded Carry',
+    D: 'Upper Body · Pre-Shift',
+    E: 'Anti-Rotation Core · Pre-Shift'
+  };
+
+  ['A', 'B', 'C', 'D', 'E'].forEach(code => {
+    const sess = SESSIONS[code];
+    const key = `ph${phase}_wk${week}_${code}`;
+    const saved = state.completedSessions[key];
+    const totalEx = getTotalExercises(code);
+    const checked = saved ? saved.exercises.filter(Boolean).length : 0;
+    const pct = totalEx > 0 ? checked / totalEx : 0;
+    const isFullyDone = saved && saved.done;
+
+    const card = document.createElement('div');
+    card.className = 'session-card';
+    card.innerHTML = `
+      <div class="session-card-header">
+        <div class="session-code-pill" style="background:${phaseColors[phase]}">
+          ${code}
+          <small>SESSION</small>
+        </div>
+        <div class="session-info">
+          <div class="session-title">${sess.title}</div>
+          <div class="session-tags">${sess.tags.split('·').slice(0,3).join('·')}</div>
+        </div>
+        <div class="session-meta">
+          <div class="session-mins">${sess.mins}<small>MIN</small></div>
+          <div class="session-progress-ring">
+            ${renderRing(pct, isFullyDone ? '#7a9e58' : '#c07c00')}
+          </div>
+        </div>
+      </div>
+      <div class="type-badge ${sess.type === 'FULL SESSION' ? 'full-badge' : 'short-badge'}">
+        ${isFullyDone ? '✓ COMPLETED · ' : ''}${sess.type}
+      </div>
+    `;
+    card.onclick = () => openSession(phase, code, week);
+    grid.appendChild(card);
+  });
+
+  // iOS install prompt
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                    || window.navigator.standalone;
+  if (isIOS && !isStandalone) {
+    document.getElementById('install-banner').style.display = 'block';
+  }
+}
+
+function getTotalExercises(code) {
+  const sess = SESSIONS[code];
+  let total = sess.blocks.reduce((s, b) => s + b.exercises.length, 0);
+  return total;
+}
+
+function renderRing(pct, color) {
+  const r = 11, circ = 2 * Math.PI * r;
+  const offset = circ * (1 - pct);
+  const display = Math.round(pct * 100);
+  return `
+    <div class="ring-wrap">
+      <svg width="28" height="28" viewBox="0 0 28 28">
+        <circle class="ring-bg" cx="14" cy="14" r="${r}"/>
+        <circle class="ring-fg" cx="14" cy="14" r="${r}"
+          stroke="${color}"
+          stroke-dasharray="${circ.toFixed(1)}"
+          stroke-dashoffset="${offset.toFixed(1)}"/>
+      </svg>
+      <div class="ring-pct">${display > 0 ? display + '%' : ''}</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER SESSION DETAIL
+// ═══════════════════════════════════════════════════════════════════
+
+function renderSession(phase, code, week) {
+  const sess = SESSIONS[code];
+  const key = `ph${phase}_wk${week}_${code}`;
+  if (!state.completedSessions[key]) {
+    const total = getTotalExercises(code);
+    state.completedSessions[key] = {
+      exercises: new Array(total).fill(false),
+      done: false, ts: null
+    };
+    saveState();
+  }
+  const saved = state.completedSessions[key];
+  const checkedCount = saved.exercises.filter(Boolean).length;
+  const totalEx = saved.exercises.length;
+  const pct = Math.round((checkedCount / totalEx) * 100);
+
+  const phaseNote = SESSION_PHASE_NOTES[phase] ? SESSION_PHASE_NOTES[phase][code] : null;
+  const phaseColors = {
+    1: { pill: '#3d5028', text: '#dce8ca' },
+    2: { pill: '#243d58', text: '#dce8f4' },
+    3: { pill: '#4a3208', text: '#faf4de' }
+  };
+  const pc = phaseColors[phase];
+
+  let html = `
+    <div class="session-hero" style="border-bottom-color:${pc.pill}">
+      <div class="session-hero-type" style="color:${pc.text}">
+        PHASE ${phase} · WEEK ${week} · ${sess.type}
+      </div>
+      <div class="session-hero-title">${sess.title}</div>
+      <div class="session-hero-tags">${sess.tags}</div>
+      <div class="session-stats">
+        <div class="stat-pill"><span>${sess.mins}</span> MIN</div>
+        <div class="stat-pill"><span>${checkedCount}/${totalEx}</span> EXERCISES</div>
+        <div class="stat-pill"><span>${pct}%</span> DONE</div>
+      </div>
+    </div>
+    <div class="session-actions">
+      <button class="btn-reset" onclick="resetSession('${phase}','${code}','${week}')">RESET</button>
+      <button class="btn-complete ${saved.done ? 'done' : ''}"
+              id="complete-btn"
+              onclick="markSessionDone('${phase}','${code}','${week}')">
+        ${saved.done ? '✓ SESSION COMPLETE' : 'MARK COMPLETE'}
+      </button>
+    </div>
+  `;
+
+  if (saved.done) {
+    html += `
+      <div class="session-complete-bar">
+        <span class="icon">✓</span>
+        <span class="text">SESSION COMPLETED · WELL DONE, SGT</span>
+      </div>`;
+  }
+
+  if (phaseNote) {
+    html += `<div class="note-bar" style="margin-top:12px">
+      <strong>Phase ${phase} note:</strong> ${phaseNote}</div>`;
+  }
+
+  // Build exercise index
+  let exIdx = 0;
+
+  sess.blocks.forEach(block => {
+    html += `
+      <div class="block-section">
+        <div class="block-header">
+          <div class="block-type-tag">${block.type}</div>
+          <div class="block-detail">${block.detail}</div>
+        </div>
+        <div class="ex-list">`;
+
+    block.exercises.forEach(ex => {
+      const idx = exIdx++;
+      const checked = saved.exercises[idx];
+      html += `
+        <div class="ex-row ${checked ? 'checked' : ''}" id="ex-${idx}"
+             onclick="toggleExercise('${phase}','${code}','${week}',${idx})">
+          <div class="ex-check">
+            <svg class="ex-check-icon" width="14" height="14" viewBox="0 0 14 14"
+                 fill="none" stroke="#1a1816" stroke-width="2.5" stroke-linecap="round">
+              <polyline points="2,7 5.5,11 12,3"/>
+            </svg>
+            <div class="ex-check-empty"></div>
+          </div>
+          <div class="ex-body">
+            <div class="ex-name">${ex.name}</div>
+            ${ex.sub ? `<div class="ex-sub">${ex.sub}</div>` : ''}
+          </div>
+          <div class="ex-right">
+            <div class="ex-reps">${ex.reps}</div>
+            <div class="ex-load">${ex.load}</div>
+          </div>
+        </div>`;
+    });
+
+    html += `</div>`; // ex-list
+    if (block.note) {
+      html += `<div class="note-bar">${block.note}</div>`;
+    }
+    html += `</div>`; // block-section
+  });
+
+  // Conditioning
+  if (sess.conditioning) {
+    const cond = sess.conditioning;
+    html += `<div style="padding:12px 16px 0">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+                  letter-spacing:0.15em;color:var(--ghost);margin-bottom:8px;">
+        ${cond.label}
+      </div>
+    </div>`;
+
+    if (cond.note) {
+      html += `<div class="note-bar" style="margin-top:0">${cond.note}</div>`;
+    }
+
+    cond.options.forEach(opt => {
+      const badgeClass = opt.badge === 'A' ? 'opt-a' : opt.badge === 'B' ? 'opt-b' : 'opt-c';
+      html += `
+        <div class="cond-option">
+          <div class="cond-option-hdr">
+            <div class="cond-opt-badge ${badgeClass}">OPTION ${opt.badge}</div>
+            <div class="cond-opt-title">${opt.label}</div>
+            ${opt.indoor ? '<div class="indoor-tag">▶ INDOOR</div>' : ''}
+          </div>
+          <div class="cond-opt-body">
+            <div class="cond-opt-desc">${opt.desc}</div>
+            <div class="cond-opt-stats">
+              <div class="cond-dur">${opt.dur}</div>
+              <div class="cond-int">${opt.intensity}</div>
+            </div>
+          </div>
+        </div>`;
+    });
+  }
+
+  document.getElementById('session-content').innerHTML = html;
+}
+
+function toggleExercise(phase, code, week, idx) {
+  const key = `ph${phase}_wk${week}_${code}`;
+  state.completedSessions[key].exercises[idx] =
+    !state.completedSessions[key].exercises[idx];
+  saveState();
+
+  // Update row visually without full re-render
+  const row = document.getElementById('ex-' + idx);
+  if (row) {
+    row.classList.toggle('checked',
+      state.completedSessions[key].exercises[idx]);
+  }
+
+  // Update stats in hero
+  const saved = state.completedSessions[key];
+  const checked = saved.exercises.filter(Boolean).length;
+  const total = saved.exercises.length;
+  const pct = Math.round((checked / total) * 100);
+  const statPills = document.querySelectorAll('.session-stats .stat-pill');
+  if (statPills[1]) statPills[1].innerHTML = `<span>${checked}/${total}</span> EXERCISES`;
+  if (statPills[2]) statPills[2].innerHTML = `<span>${pct}%</span> DONE`;
+}
+
+function markSessionDone(phase, code, week) {
+  const key = `ph${phase}_wk${week}_${code}`;
+  const saved = state.completedSessions[key];
+
+  if (saved.done) {
+    saved.done = false;
+    saveState();
+    showToast('Session unmarked');
+    renderSession(phase, code, week);
+    return;
+  }
+
+  // Mark all exercises done
+  saved.exercises = saved.exercises.map(() => true);
+  saved.done = true;
+  saved.ts = Date.now();
+
+  // Add to log
+  state.log.unshift({ session: code, week: parseInt(week),
+                      phase: parseInt(phase), ts: Date.now() });
+  if (state.log.length > 50) state.log = state.log.slice(0, 50);
+
+  saveState();
+  showToast('Session complete! 💪');
+  renderSession(phase, code, week);
+}
+
+function resetSession(phase, code, week) {
+  const key = `ph${phase}_wk${week}_${code}`;
+  const total = getTotalExercises(code);
+  state.completedSessions[key] = {
+    exercises: new Array(total).fill(false),
+    done: false, ts: null
+  };
+  saveState();
+  renderSession(phase, code, week);
+  showToast('Session reset');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER PROGRAMME
+// ═══════════════════════════════════════════════════════════════════
+
+function renderProgramme() {
+  const list = document.getElementById('programme-list');
+  list.innerHTML = '';
+
+  const sessionDescs = {
+    A: ['Posterior Chain + Zone 2', 'KB · DB · Pull-ups · Zone 2'],
+    B: ['KB Metcon + HIIT', 'KB · Sandbag · Sprints / Bike'],
+    C: ['Lower Body + Loaded Carry', 'KB · Sandbag · Vest · Hills'],
+    D: ['Upper Body · Pre-Shift', 'KB · DB · Pull-ups · Dips · 25 MIN'],
+    E: ['Anti-Rotation Core · Pre-Shift', 'BW · Bands · KB · 25 MIN'],
+  };
+  const phaseColors = {
+    1: { bg: '#3d5028', lt: '#dce8ca' },
+    2: { bg: '#243d58', lt: '#dce8f4' },
+    3: { bg: '#4a3208', lt: '#faf4de' }
+  };
+
+  PHASES.forEach((ph, i) => {
+    const pc = phaseColors[ph.num];
+    const banner = document.createElement('div');
+    banner.className = `phase-banner`;
+    banner.innerHTML = `
+      <div class="phase-banner-inner ${ph.bg}" onclick="togglePhase(${i})">
+        <div class="phase-num">${ph.num}</div>
+        <div class="phase-info">
+          <div class="phase-label">// PHASE ${ph.num}</div>
+          <div class="phase-name">${ph.name}</div>
+          <div class="phase-tagline">${ph.tagline}</div>
+        </div>
+        <div class="phase-weeks">WK<br>${ph.weeks}</div>
+      </div>
+    `;
+    list.appendChild(banner);
+
+    const sessDiv = document.createElement('div');
+    sessDiv.className = 'prog-session-list';
+    sessDiv.id = `prog-ph-${i}`;
+
+    ph.sessions.forEach(code => {
+      const [title, tags] = sessionDescs[code];
+      const row = document.createElement('div');
+      row.className = 'prog-session-row';
+      row.innerHTML = `
+        <div class="prog-code" style="background:${pc.bg}">${code}</div>
+        <div class="prog-info">
+          <div class="prog-title">${title}</div>
+          <div class="prog-sub">${tags}</div>
+        </div>
+        <div class="prog-arrow">›</div>
+      `;
+      row.onclick = () => openSession(ph.num, code, (ph.num - 1) * 4 + 1);
+      sessDiv.appendChild(row);
+    });
+    list.appendChild(sessDiv);
+  });
+}
+
+function togglePhase(i) {
+  const el = document.getElementById(`prog-ph-${i}`);
+  el.classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER PROGRESS
+// ═══════════════════════════════════════════════════════════════════
+
+function renderProgress() {
+  // Count totals
+  let totalDone = 0, totalSessions = 12 * 5; // 12 weeks × 5 sessions
+  Object.values(state.completedSessions).forEach(s => {
+    if (s.done) totalDone++;
+  });
+
+  const streak = calcStreak();
+  const exDone = Object.values(state.completedSessions)
+    .reduce((s, sess) => s + sess.exercises.filter(Boolean).length, 0);
+
+  // Stats grid
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-card-label">SESSIONS DONE</div>
+      <div class="stat-card-val">${totalDone}</div>
+      <div class="stat-card-unit">of ${totalSessions} total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">CURRENT WEEK</div>
+      <div class="stat-card-val">${state.currentWeek}</div>
+      <div class="stat-card-unit">of 12 weeks</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">EXERCISES LOGGED</div>
+      <div class="stat-card-val">${exDone}</div>
+      <div class="stat-card-unit">sets checked off</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">STREAK</div>
+      <div class="stat-card-val">${streak}</div>
+      <div class="stat-card-unit">sessions this week</div>
+    </div>
+  `;
+
+  // Phase progress
+  const phaseColors = {
+    1: { fill: '#7a9e58', bg: '#3d5028' },
+    2: { fill: '#6090b8', bg: '#243d58' },
+    3: { fill: '#c8a030', bg: '#4a3208' }
+  };
+  const pc = document.getElementById('phase-progress-cards');
+  pc.innerHTML = '';
+  PHASES.forEach(ph => {
+    let done = 0;
+    for (let w = (ph.num-1)*4+1; w <= ph.num*4; w++) {
+      ['A','B','C','D','E'].forEach(c => {
+        const k = `ph${ph.num}_wk${w}_${c}`;
+        if (state.completedSessions[k]?.done) done++;
+      });
+    }
+    const total = 4 * 5;
+    const pct = Math.round((done / total) * 100);
+    const col = phaseColors[ph.num];
+    pc.innerHTML += `
+      <div class="phase-progress-card">
+        <div class="phase-progress-hdr">
+          <div class="phase-progress-name" style="color:var(--plate)">
+            PHASE ${ph.num} — ${ph.name}
+          </div>
+          <div class="phase-progress-pct">${pct}%</div>
+        </div>
+        <div class="phase-prog-bar">
+          <div class="phase-prog-fill"
+               style="width:${pct}%;background:${col.fill}"></div>
+        </div>
+      </div>`;
+  });
+
+  // Recent log
+  const rl = document.getElementById('recent-list');
+  if (state.log.length === 0) {
+    rl.innerHTML = `<div style="color:var(--ghost);font-size:13px;padding:10px 0">
+      No sessions logged yet. Complete a session to see it here.</div>`;
+  } else {
+    rl.innerHTML = state.log.slice(0, 8).map(entry => {
+      const d = new Date(entry.ts);
+      const timeStr = d.toLocaleDateString('en-US', {month:'short', day:'numeric'})
+                    + ' ' + d.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
+      const sessionNames = {
+        A: 'Posterior Chain + Zone 2', B: 'KB Metcon + HIIT',
+        C: 'Lower Body + Carry', D: 'Upper Body Pre-Shift', E: 'Core Pre-Shift'
+      };
+      return `
+        <div class="recent-row">
+          <div class="recent-dot"></div>
+          <div class="recent-text">
+            <strong>Session ${entry.session}</strong> — ${sessionNames[entry.session]}
+            <div style="font-size:11px;color:var(--ghost)">Phase ${entry.phase} · Week ${entry.week}</div>
+          </div>
+          <div class="recent-time">${timeStr}</div>
+        </div>`;
+    }).join('');
+  }
+}
+
+function calcStreak() {
+  const now = Date.now();
+  const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
+  return state.log.filter(e => e.ts > weekAgo).length;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════════════
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function confirmReset() {
+  if (confirm('Reset ALL progress? This cannot be undone.')) {
+    state = { currentWeek: 1, completedSessions: {}, log: [] };
+    saveState();
+    renderProgress();
+    showToast('Progress reset');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+renderToday();
+</script>
+</body>
+</html>
